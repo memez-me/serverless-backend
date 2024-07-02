@@ -261,11 +261,6 @@ app.post("/message/:messageId/unlike", async (req, res) => {
 
   const id = `${messageId}-${user}`;
 
-  const item = {
-    id,
-    user,
-  };
-
   const params = {
     TableName: LIKES_TABLE,
     Key: {
@@ -305,7 +300,7 @@ app.post("/message/:messageId/unlike", async (req, res) => {
   }
 });
 
-app.use((req, res, next) => {
+app.use((req, res) => {
   return res.status(404).json({
     error: "Not Found",
   });
