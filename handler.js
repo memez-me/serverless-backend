@@ -9,6 +9,7 @@ const {
 } = require("@aws-sdk/lib-dynamodb");
 
 const express = require("express");
+const cors = require("cors");
 const serverless = require("serverless-http");
 const { recoverMessageAddress, isAddress, getAddress } = require("viem");
 const { v4: uuidv4 } = require('uuid');
@@ -22,6 +23,11 @@ const client = new DynamoDBClient();
 const docClient = DynamoDBDocumentClient.from(client);
 
 app.use(express.json());
+
+app.use(cors({
+  credentials: true,
+  origin: ['http://localhost:3000', 'https://memez.me', 'https://*.memez-me.pages.dev'], //TODO: remove localhost for production
+}));
 
 app.get("/messages/:memecoin", async (req, res) => {
   const { memecoin } = req.params;
