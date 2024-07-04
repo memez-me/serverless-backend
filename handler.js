@@ -26,7 +26,7 @@ app.use(express.json());
 
 app.use(cors({
   credentials: true,
-  origin: ['http://localhost:3000', 'https://memez.me', 'https://*.memez-me.pages.dev'], //TODO: remove localhost for production
+  origin: ['http://localhost:3000', 'https://memez.me', 'https://dev.memez-me.pages.dev/', 'https://*.memez-me.pages.dev'], //TODO: remove localhost for production
 }));
 
 app.get("/messages/:memecoin", async (req, res) => {
@@ -85,6 +85,11 @@ app.post("/messages/:memecoin", async (req, res) => {
     return;
   } else if (typeof message !== "string") {
     res.status(400).json({ error: '"message" must be a string' });
+    return;
+  }
+  
+  if (message.length > 200) {
+    res.status(400).json({ error: '"message" must be no more than 200 characters length' });
     return;
   }
 
