@@ -10,6 +10,7 @@ const {
 
 const express = require("express");
 const cors = require("cors");
+const axios = require("axios");
 const serverless = require("serverless-http");
 const { recoverMessageAddress, isAddress, getAddress } = require("viem");
 const { v4: uuidv4 } = require('uuid');
@@ -26,8 +27,22 @@ app.use(express.json());
 
 app.use(cors({
   credentials: true,
-  origin: ['http://localhost:3000', 'https://memez.me', 'https://dev.memez-me.pages.dev/', 'https://*.memez-me.pages.dev'], //TODO: remove localhost for production
+  origin: ['http://localhost:3000', 'https://memez.me', 'https://dev.memez-me.pages.dev', 'https://*.memez-me.pages.dev'], //TODO: remove localhost for production
 }));
+
+app.post("/faucet/:postfix", async (req, res) => {
+  const { postfix } = req.params;
+  const { address, amount } = req.body;
+
+  await axios.post(`https://virtual.fraxtal.rpc.tenderly.co/${postfix}`, {
+    jsonrpc: '2.0',
+    method: 'tenderly_addBalance',
+    params: [address, `0x${BigInt(amount).toString(16)}`],
+    id: '1',
+  });
+
+  res.status(200).json({ message: 'OK' });
+});
 
 app.get("/messages/:memecoin", async (req, res) => {
   const { memecoin } = req.params;
@@ -87,7 +102,7 @@ app.post("/messages/:memecoin", async (req, res) => {
     res.status(400).json({ error: '"message" must be a string' });
     return;
   }
-  
+
   if (message.length > 200) {
     res.status(400).json({ error: '"message" must be no more than 200 characters length' });
     return;
