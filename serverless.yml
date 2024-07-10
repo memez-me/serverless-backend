@@ -35,6 +35,7 @@ provider:
     MESSAGES_TABLE: ${param:messagesTableName}
     LIKES_TABLE: ${param:likesTableName}
     TENDERLY_ADMIN_RPC: ${env:TENDERLY_ADMIN_RPC}
+    PINATA_API_KEY: ${env:PINATA_API_KEY}
 
 functions:
   api:

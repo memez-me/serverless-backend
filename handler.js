@@ -9,18 +9,29 @@ const {
 } = require("@aws-sdk/lib-dynamodb");
 
 const express = require("express");
+const multer  = require("multer");
 const cors = require("cors");
 const axios = require("axios");
 const serverless = require("serverless-http");
 const { recoverMessageAddress, isAddress, getAddress } = require("viem");
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require("uuid");
 
 const app = express();
+
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb)=> {
+    cb(null, file.mimetype.split("/")[0] === "image");
+  },
+});
 
 const TTL = 24 * 60 * 60; // 1 day
 const MESSAGES_TABLE = process.env.MESSAGES_TABLE;
 const LIKES_TABLE = process.env.LIKES_TABLE;
 const TENDERLY_ADMIN_RPC = process.env.TENDERLY_ADMIN_RPC;
+const PINATA_API_KEY = process.env.PINATA_API_KEY;
 const client = new DynamoDBClient();
 const docClient = DynamoDBDocumentClient.from(client);
 
@@ -30,6 +41,44 @@ app.use(cors({
   credentials: true,
   origin: ['http://localhost:3000', 'https://memez.me', 'https://dev.memez-me.pages.dev', 'https://*.memez-me.pages.dev'], //TODO: remove localhost for production
 }));
+
+app.post("/pinata",  upload.single("file"), async (req, res) => {
+  const formData = new FormData();
+
+  console.log(req.file);
+
+  const blob = new Blob([req.file.buffer], { type: req.file.mimetype });
+  const file = new File([blob], req.file.originalname, { type: req.file.mimetype });
+  formData.append('file', file);
+
+  const pinataMetadata = JSON.stringify({
+    name: req.body.name ?? req.file.originalname,
+  });
+  formData.append('pinataMetadata', pinataMetadata);
+
+  const pinataOptions = JSON.stringify({
+    cidVersion: 0,
+  })
+  formData.append('pinataOptions', pinataOptions);
+
+  try {
+    const response = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formData, {
+      maxBodyLength: "Infinity",
+      headers: {
+        'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+        'Authorization': `Bearer ${PINATA_API_KEY}`
+      }
+    });
+    res.status(200).json({ url: `ipfs://${response.data.IpfsHash}` });
+  } catch (error) {
+    console.error(error);
+    if (axios.isAxiosError(error) && error.response?.data?.error) {
+      res.status(500).json({ error: error.response.data.error });
+    } else {
+      throw error;
+    }
+  }
+});
 
 app.post("/faucet", async (req, res) => {
   const { address, amount } = req.body;

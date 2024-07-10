@@ -27,3 +27,4 @@ jobs:
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
           TENDERLY_ADMIN_RPC: ${{ secrets.TENDERLY_ADMIN_RPC }}
+          PINATA_API_KEY: ${{ secrets.PINATA_API_KEY }}
