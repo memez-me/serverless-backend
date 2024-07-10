@@ -34,6 +34,7 @@ provider:
   environment:
     MESSAGES_TABLE: ${param:messagesTableName}
     LIKES_TABLE: ${param:likesTableName}
+    TENDERLY_ADMIN_RPC: ${env:TENDERLY_ADMIN_RPC}
 
 functions:
   api:

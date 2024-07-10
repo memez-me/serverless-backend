@@ -20,6 +20,7 @@ const app = express();
 const TTL = 24 * 60 * 60; // 1 day
 const MESSAGES_TABLE = process.env.MESSAGES_TABLE;
 const LIKES_TABLE = process.env.LIKES_TABLE;
+const TENDERLY_ADMIN_RPC = process.env.TENDERLY_ADMIN_RPC;
 const client = new DynamoDBClient();
 const docClient = DynamoDBDocumentClient.from(client);
 
@@ -30,11 +31,10 @@ app.use(cors({
   origin: ['http://localhost:3000', 'https://memez.me', 'https://dev.memez-me.pages.dev', 'https://*.memez-me.pages.dev'], //TODO: remove localhost for production
 }));
 
-app.post("/faucet/:postfix", async (req, res) => {
-  const { postfix } = req.params;
+app.post("/faucet", async (req, res) => {
   const { address, amount } = req.body;
 
-  await axios.post(`https://virtual.fraxtal.rpc.tenderly.co/${postfix}`, {
+  await axios.post(TENDERLY_ADMIN_RPC, {
     jsonrpc: '2.0',
     method: 'tenderly_addBalance',
     params: [address, `0x${BigInt(amount).toString(16)}`],
