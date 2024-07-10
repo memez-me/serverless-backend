@@ -46,13 +46,15 @@ app.post("/faucet", async (req, res) => {
 
 app.get("/messages/:memecoin", async (req, res) => {
   const { memecoin } = req.params;
-  const { from=0 } = req.query;
+  let { from=0 } = req.query;
+
+  from = Number(from);
 
   if (typeof memecoin !== "string" || !isAddress(memecoin)) {
     res.status(400).json({ error: '"memecoin" must be an address' });
     return;
-  } else if (typeof from !== "number") {
-    res.status(400).json({ error: '"from" must be a number' });
+  } else if (!(from >= 0)) {
+    res.status(400).json({ error: '"from" must be a non-negative number' });
     return;
   }
 
