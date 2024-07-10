@@ -3,13 +3,13 @@ org: memez
 # "app" enables Serverless Framework Dashboard features and sharing them with other Services.
 app: memez
 # "service" is the name of this project. This will also be added to your AWS resource names.
-service: memez-chat
+service: memez-backend
 
 stages:
   default:
     params:
-      messagesTableName: "messages-table-${sls:stage}"
-      likesTableName: "likes-table-${sls:stage}"
+      messagesTableName: "chat-messages-table-${sls:stage}"
+      likesTableName: "chat-likes-table-${sls:stage}"
 
 provider:
   name: aws
